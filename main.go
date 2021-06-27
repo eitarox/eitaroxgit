@@ -4,14 +4,15 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
-	"os"
+	//"os"
 
 	"github.com/eitarox/eitaroxgit/object"
 	"github.com/eitarox/eitaroxgit/store"
 )
 
 func main() {
-	hashString := os.Args[1]
+	// hashString := os.Args[1]
+	hashString := "8c467a9fbb72f4811b56258768359367398958c0"
 	hash, err := hex.DecodeString(hashString)
 	if err != nil {
 		log.Fatal(err)

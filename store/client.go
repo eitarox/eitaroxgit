@@ -46,38 +46,38 @@ func (c *Client) GetObject(hash sha.SHA1) (*object.Object, error) {
 	return obj, nil
 }
 
-type WalkFunc func(*object.Commit)error
+type WalkFunc func(commit *object.Commit) error
 
-func (c *Client) WalkHistory(hash sha.SHA1, 
-walkFunc WalkFunc)error{
+func (c *Client) WalkHistory(hash sha.SHA1,
+	walkFunc WalkFunc) error {
 	ancestors := []sha.SHA1{hash}
 	cycleCheck := map[string]struct{}{}
 
 	// BFS
-	for len(ancestors) > 0{
+	for len(ancestors) > 0 {
 		currentHash := ancestors[0]
-		if _,ok := cycleCheck[string(currentHash)];ok{
-			ancestors = ancestors [1:]
+		if _, ok := cycleCheck[string(currentHash)]; ok {
+			ancestors = ancestors[1:]
 			continue
 		}
 		cycleCheck[string(currentHash)] = struct{}{}
 
-		obj,err := c.GetObject(currentHash)
-		if err != nil{
+		obj, err := c.GetObject(currentHash)
+		if err != nil {
 			return err
 		}
 
-		current,err := object.NewCommit(obj)
-		if err !=nil{
+		current, err := object.NewCommit(obj)
+		if err != nil {
 			return err
 		}
 
-		if err := walkFunc(current); err != nil{
+		if err := walkFunc(current); err != nil {
 			return err
 		}
 
 		// bad performance
-		ancestors = append(ancestors[1:],current.Parents... )
+		ancestors = append(ancestors[1:], current.Parents...)
 	}
 
 	return nil

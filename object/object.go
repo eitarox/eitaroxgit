@@ -24,8 +24,6 @@ func (o *Object) Header() []byte {
 
 func ReadObject(r io.Reader) (*Object, error) {
 	checkSum := sha1.New()
-
-	checkSum.Write(nil)
 	tr := io.TeeReader(r, checkSum)
 
 	objectType, size, err := readHeader(tr)
@@ -34,6 +32,10 @@ func ReadObject(r io.Reader) (*Object, error) {
 	}
 
 	data, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+
 	if len(data) != size {
 		return nil, ErrInvalidObject
 	}
