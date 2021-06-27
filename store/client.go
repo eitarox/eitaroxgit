@@ -14,13 +14,13 @@ type Client struct {
 	objectDir string
 }
 
-func newClient(path string) (*Client, error) {
+func NewClient(path string) (*Client, error) {
 	rootDir, err := util.FindGitRoot(path)
 	if err != nil {
 		return nil, err
 	}
 	return &Client{
-		objectDir: filepath.Join(rootDir, ".git", "object"),
+		objectDir: filepath.Join(rootDir, ".git", "objects"),
 	}, nil
 }
 
@@ -44,4 +44,41 @@ func (c *Client) GetObject(hash sha.SHA1) (*object.Object, error) {
 		return nil, err
 	}
 	return obj, nil
+}
+
+type WalkFunc func(*object.Commit)error
+
+func (c *Client) WalkHistory(hash sha.SHA1, 
+walkFunc WalkFunc)error{
+	ancestors := []sha.SHA1{hash}
+	cycleCheck := map[string]struct{}{}
+
+	// BFS
+	for len(ancestors) > 0{
+		currentHash := ancestors[0]
+		if _,ok := cycleCheck[string(currentHash)];ok{
+			ancestors = ancestors [1:]
+			continue
+		}
+		cycleCheck[string(currentHash)] = struct{}{}
+
+		obj,err := c.GetObject(currentHash)
+		if err != nil{
+			return err
+		}
+
+		current,err := object.NewCommit(obj)
+		if err !=nil{
+			return err
+		}
+
+		if err := walkFunc(current); err != nil{
+			return err
+		}
+
+		// bad performance
+		ancestors = append(ancestors[1:],current.Parents... )
+	}
+
+	return nil
 }

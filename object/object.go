@@ -69,7 +69,7 @@ func readHeader(r io.Reader) (Type, int, error) {
 		return UndefinedObject, 0, err
 	}
 	var size int
-	if _, err := fmt.Sscanf(sizeString, " %d", &size); err != nil {
+	if _, err := fmt.Sscanf(sizeString, "%d", &size); err != nil {
 		return UndefinedObject, 0, err
 	}
 
